@@ -1,83 +1,76 @@
 import streamlit as st
 import pandas as pd
 from src import model
-import json
+import streamlit.components.v1 as components
 
 # Page config
-st.set_page_config(page_title="Movie Success Predictor", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="Moviegrad — Movie Success Predictor", page_icon="🎬", layout="wide")
 
-# --- UI: Theme control ---
-theme = st.sidebar.radio("Theme", ("Dark (default)", "High-Contrast", "Light"))
+# Path to the provided logo (uploaded to the environment)
+LOGO_PATH = "/mnt/data/476714a7-f833-4401-91a6-a682c7bf353d.jpeg"
 
-# Lottie animation URL (public) - will be embedded via HTML
+# Theme colors derived from the logo: teal/cyan and gold on deep navy
+PRIMARY_CYAN = "#18B6C9"
+SECONDARY_DEEP = "#062033"
+GOLD = "#F0B84A"
+MUTED = "#A9CBDC"
+CARD_BG = "rgba(255,255,255,0.03)"
+
+# Lottie animation URL (keeps subtle motion)
 LOTTIE_URL = "https://assets10.lottiefiles.com/packages/lf20_touohxv0.json"
 
-# --- Dynamic CSS for central layout + theme variations ---
-css = {
-    'Dark (default)': """
-    :root{--bg1:#071024;--bg2:#0b2340;--card:#0f1724;--muted:#9fb4d8;--accent:linear-gradient(90deg,#6dd5ed,#2193b0);--text:#e6eef6}
-    .stApp{background:radial-gradient(circle at 10% 10%, var(--bg1) 0%, var(--bg2) 40%, #112b3c 100%);color:var(--text)}
-    """,
-    'High-Contrast': """
-    :root{--bg1:#000000;--bg2:#0a0a0a;--card:#111111;--muted:#ffffff;--accent:linear-gradient(90deg,#ffd166,#ef476f);--text:#ffffff}
-    .stApp{background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
-    """,
-    'Light': """
-    :root{--bg1:#f6f8fb;--bg2:#e9eef6;--card:#ffffff;--muted:#40566b;--accent:linear-gradient(90deg,#6dd5ed,#2193b0);--text:#102a43}
-    .stApp{background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
-    """
-}
-
-st.markdown(
-    f"""
+# --- CSS: centered layout, colors from logo, rounded poster card ---
+st.markdown(f"""
     <style>
-    {css[theme]}
-    .center-container{{
-        max-width:900px;width:100%;margin:0 auto;border-radius:14px;padding:1.5rem;background:rgba(255,255,255,0.02);box-shadow:0 12px 40px rgba(2,6,23,0.45);border:1px solid rgba(255,255,255,0.03);
-    }}
-    .header-row{{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:10px}}
-    .title{{font-size:28px;font-weight:700;margin:0}}
-    .subtitle{{color:var(--muted);margin-top:4px;text-align:center}}
-    .input-card{{background:var(--card);padding:1rem;border-radius:10px;margin-top:1rem}}
-    .preview-card{{background:rgba(255,255,255,0.02);padding:0.8rem;border-radius:8px}}
-    .footer{{color:var(--muted);text-align:center;margin-top:12px;font-size:13px}}
-    .stButton>button{{border-radius:10px;padding:8px 18px;background:var(--accent);border:none}}
+    :root{{--primary:{PRIMARY_CYAN};--gold:{GOLD};--deep:{SECONDARY_DEEP};--muted:{MUTED};}}
+    .stApp{{background: radial-gradient(circle at 10% 10%, #031018 0%, #071e2d 40%, #0b2633 100%); color: #eaf6fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;}}
+    .center-container{{max-width:980px;margin:0 auto;border-radius:14px;padding:1.6rem;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));box-shadow:0 16px 50px rgba(3,6,20,0.7);border:1px solid rgba(255,255,255,0.02);}}
+    .header{{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:6px}}
+    .logo-img{{height:86px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.6);}}
+    .title{{font-size:30px;font-weight:800;margin:0;color:var(--primary);letter-spacing:0.2px}}
+    .subtitle{{color:var(--muted);margin-top:2px;text-align:center}}
+    .input-card{{background:{CARD_BG};padding:1.1rem;border-radius:12px;margin-top:12px;border:1px solid rgba(255,255,255,0.02)}}
+    .preview-card{{background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));padding:0.8rem;border-radius:12px}}
+    .poster{{border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}}
+    .result-badge{{padding:10px 16px;border-radius:999px;font-weight:700}}
+    .hit{{background:linear-gradient(90deg,var(--primary),#3bd0c7);color:#001918}}
+    .flop{{background:linear-gradient(90deg,#3a3f4b,#1c2732);color:#f2f6f8}}
+    .stButton>button{{border-radius:10px;padding:10px 20px;border:none;background:linear-gradient(90deg,var(--primary),#2fb6c1);box-shadow:0 8px 20px rgba(24,182,201,0.12)}}
+    .footer{{color:var(--muted);text-align:center;margin-top:14px;font-size:13px}}
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 # --- Central wrapper ---
 st.markdown("<div class='center-container'>", unsafe_allow_html=True)
 
-# Header with Lottie animation centered (using HTML embed)
-st.markdown(
-    """
-    <div class='header-row'>
-        <div style='text-align:center'>
-            <div class='title'>🎬 Movie Success Predictor</div>
-            <div class='subtitle'>Enter movie details below — </div>
+# Header with logo and title centered
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.markdown("<div class='header'>", unsafe_allow_html=True)
+    st.image(LOGO_PATH, width=86, caption=None, clamp=False)
+    st.markdown("""
+        <div style='text-align:left'>
+            <div class='title'>Moviegrad</div>
+            <div class='subtitle'>SUCCESS PREDICTOR — Predict box-office hits with confidence</div>
         </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# Embed Lottie animation using web component inside a centered div
-st.components.v1.html(f"""
-    <div style='display:flex;justify-content:center;margin-bottom:6px;'>
+# Lottie animation beneath header for motion and charm
+components.html(f"""
+    <div style='display:flex;justify-content:center;margin-top:6px;margin-bottom:10px;'>
       <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-      <lottie-player src=\"{LOTTIE_URL}\" background=\"transparent\" speed=\"1\" style=\"width:220px;height:220px;\" loop autoplay></lottie-player>
+      <lottie-player src=\"{LOTTIE_URL}\" background=\"transparent\" speed=\"0.9\" style=\"width:160px;height:160px;\" loop autoplay></lottie-player>
     </div>
-""", height=260)
+""", height=200)
 
 # Main content: inputs centered
 with st.container():
-    left_col, mid_col, right_col = st.columns([1, 2, 1])
+    left_col, mid_col, right_col = st.columns([1,2,1])
 
     with mid_col:
         st.markdown("<div class='input-card'>", unsafe_allow_html=True)
-        st.markdown("### Movie Details (centered)")
+        st.markdown("### Enter Movie Details")
 
         genre = st.selectbox("🎭 Genre", ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Romance', 'Sci-Fi', 'Fantasy'])
 
@@ -102,10 +95,10 @@ with st.container():
         st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
         btn_col1, btn_col2, btn_col3 = st.columns([1,1,1])
         with btn_col2:
-            predict_btn = st.button("Predict Success", key="predict_centered")
+            predict_btn = st.button("Predict Success", key="predict_with_logo")
 
-        # Preview and result
-        st.markdown("<div class='preview-card' style='margin-top:12px'>", unsafe_allow_html=True)
+        # Preview and result area
+        st.markdown("<div class='preview-card' style='margin-top:14px'>", unsafe_allow_html=True)
         preview_df = pd.DataFrame([{
             'Genre': genre,
             'Budget (M$)': budget,
@@ -117,8 +110,12 @@ with st.container():
             'Sequel': 'Yes' if is_sequel else 'No'
         }])
         st.table(preview_df)
+
+        # Poster preview as rounded card
         if poster is not None:
-            st.image(poster, use_column_width=True)
+            st.image(poster, use_column_width=True, output_format='auto')
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
         st.markdown("</div>", unsafe_allow_html=True)
 
 # Close central container wrapper
@@ -139,7 +136,7 @@ input_dict = {
     'title': 'User Input Movie'
 }
 
-# Prediction logic (centered results)
+# Prediction logic with themed result badges
 if predict_btn:
     with st.spinner("Predicting..."):
         try:
@@ -157,23 +154,19 @@ if predict_btn:
             pred = int(result['prediction'][0]) if ('prediction' in result and len(result['prediction'])>0) else 0
             score = float(result['score'][0]) if ('score' in result and len(result['score'])>0) else None
 
-            # Centered result display
+            # Themed result display
             if pred == 1:
-                st.markdown("<div style='text-align:center;margin-top:12px'>", unsafe_allow_html=True)
-                st.success("🎉 Prediction: Hit! This movie is likely to succeed at the box office.")
+                st.markdown(f"<div style='text-align:center;margin-top:12px'><span class='result-badge hit'>🎉 HIT</span></div>", unsafe_allow_html=True)
                 if score is not None:
                     st.metric(label="Confidence", value=f"{score:.1%}")
                 st.balloons()
-                st.markdown("</div>", unsafe_allow_html=True)
             else:
-                st.markdown("<div style='text-align:center;margin-top:12px'>", unsafe_allow_html=True)
-                st.error("❌ Prediction: Flop. Consider revising budget, marketing or casting choices.")
+                st.markdown(f"<div style='text-align:center;margin-top:12px'><span class='result-badge flop'>❌ FLOP</span></div>", unsafe_allow_html=True)
                 if score is not None:
                     st.metric(label="Confidence", value=f"{score:.1%}")
-                st.markdown("</div>", unsafe_allow_html=True)
 
         except Exception as e:
             st.exception(e)
 
 # Footer
-st.markdown("<div class='footer'>Made with ❤️ — Aditya Tiwari,Akshat Verma,Ansh Sharma</code></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer'>Made with ❤️ — theme tuned to your logo colors. Run: <code>streamlit run streamlit_movie_predictor.py</code></div>", unsafe_allow_html=True)
