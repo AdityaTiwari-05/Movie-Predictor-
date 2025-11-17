@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="Moviegrad — Movie Success Predictor", page_icon="🎬", layout="wide")
 
 # Path to the provided logo (uploaded to the environment)
-LOGO_PATH = "/mnt/data/476714a7-f833-4401-91a6-a682c7bf353d.jpeg"
+LOGO_PATH = "logo.jpeg"
 
 # Theme colors derived from the logo: teal/cyan and gold on deep navy
 PRIMARY_CYAN = "#18B6C9"
