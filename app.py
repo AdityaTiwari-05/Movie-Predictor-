@@ -169,4 +169,4 @@ if predict_btn:
             st.exception(e)
 
 # Footer
-st.markdown(f"<div class='footer'>Made with ❤️ — theme tuned to your logo colors. Run: <code>streamlit run streamlit_movie_predictor.py</code></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer'>Made with ❤️ — Aditya Tiwari, Akshat Verma, Ansh Sharma </code></div>", unsafe_allow_html=True)
