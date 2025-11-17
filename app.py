@@ -168,4 +168,4 @@ if predict_btn:
             st.exception(e)
 
 # Footer
-st.markdown("<div class='footer'>Made with ❤️ — centered layout. Want a dark/light theme toggle or animations?</div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>Made with ❤️ — Aditya Tiwari,Akshat Verma,Ansh Sharma</div>", unsafe_allow_html=True)
