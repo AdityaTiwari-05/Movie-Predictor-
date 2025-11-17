@@ -56,7 +56,7 @@ st.markdown(
     <div class='header-row'>
         <div style='text-align:center'>
             <div class='title'>🎬 Movie Success Predictor</div>
-            <div class='subtitle'>Enter movie details below — subtle animation and a contrasting theme</div>
+            <div class='subtitle'>Enter movie details below — </div>
         </div>
     </div>
     """,
@@ -176,4 +176,4 @@ if predict_btn:
             st.exception(e)
 
 # Footer
-st.markdown("<div class='footer'>Made with ❤️ — theme & animation added. Run with: <code>streamlit run streamlit_movie_predictor.py</code></div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>Made with ❤️ — Aditya Tiwari,Akshat Verma,Ansh Sharma</code></div>", unsafe_allow_html=True)
