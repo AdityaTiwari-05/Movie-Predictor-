@@ -1,47 +1,47 @@
 import streamlit as st
 import pandas as pd
 from src import model
+import json
 
 # Page config
 st.set_page_config(page_title="Movie Success Predictor", page_icon="🎬", layout="wide")
 
-# --- Centralized CSS for aesthetics and centering ---
-st.markdown(
+# --- UI: Theme control ---
+theme = st.sidebar.radio("Theme", ("Dark (default)", "High-Contrast", "Light"))
+
+# Lottie animation URL (public) - will be embedded via HTML
+LOTTIE_URL = "https://assets10.lottiefiles.com/packages/lf20_touohxv0.json"
+
+# --- Dynamic CSS for central layout + theme variations ---
+css = {
+    'Dark (default)': """
+    :root{--bg1:#071024;--bg2:#0b2340;--card:#0f1724;--muted:#9fb4d8;--accent:linear-gradient(90deg,#6dd5ed,#2193b0);--text:#e6eef6}
+    .stApp{background:radial-gradient(circle at 10% 10%, var(--bg1) 0%, var(--bg2) 40%, #112b3c 100%);color:var(--text)}
+    """,
+    'High-Contrast': """
+    :root{--bg1:#000000;--bg2:#0a0a0a;--card:#111111;--muted:#ffffff;--accent:linear-gradient(90deg,#ffd166,#ef476f);--text:#ffffff}
+    .stApp{background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
+    """,
+    'Light': """
+    :root{--bg1:#f6f8fb;--bg2:#e9eef6;--card:#ffffff;--muted:#40566b;--accent:linear-gradient(90deg,#6dd5ed,#2193b0);--text:#102a43}
+    .stApp{background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
     """
+}
+
+st.markdown(
+    f"""
     <style>
-    :root{
-        --card-bg: rgba(255,255,255,0.04);
-        --accent: linear-gradient(90deg,#6dd5ed,#2193b0);
-        --glass: rgba(255,255,255,0.03);
-    }
-    .stApp {
-        background: radial-gradient(circle at 10% 10%, #071024 0%, #0b2340 40%, #112b3c 100%);
-        color: #e6eef6;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 1rem;
-    }
-    .center-container{
-        max-width: 900px;
-        width: 100%;
-        margin: 0 auto;
-        border-radius: 14px;
-        padding: 1.5rem;
-        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-        box-shadow: 0 12px 40px rgba(2,6,23,0.7);
-        border: 1px solid rgba(255,255,255,0.03);
-    }
-    .header-row{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:10px}
-    .title {font-size:28px;font-weight:700;margin:0}
-    .subtitle{color:#bcd6ff;margin-top:4px;text-align:center}
-    .input-card{background:var(--card-bg);padding:1rem;border-radius:10px;margin-top:1rem}
-    .preview-card{background:var(--glass);padding:0.8rem;border-radius:8px}
-    .centered {display:flex;align-items:center;justify-content:center}
-    .footer{color:#9fb4d8;text-align:center;margin-top:12px;font-size:13px}
-    .stButton>button{border-radius:10px;padding:8px 18px}
+    {css[theme]}
+    .center-container{{
+        max-width:900px;width:100%;margin:0 auto;border-radius:14px;padding:1.5rem;background:rgba(255,255,255,0.02);box-shadow:0 12px 40px rgba(2,6,23,0.45);border:1px solid rgba(255,255,255,0.03);
+    }}
+    .header-row{{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:10px}}
+    .title{{font-size:28px;font-weight:700;margin:0}}
+    .subtitle{{color:var(--muted);margin-top:4px;text-align:center}}
+    .input-card{{background:var(--card);padding:1rem;border-radius:10px;margin-top:1rem}}
+    .preview-card{{background:rgba(255,255,255,0.02);padding:0.8rem;border-radius:8px}}
+    .footer{{color:var(--muted);text-align:center;margin-top:12px;font-size:13px}}
+    .stButton>button{{border-radius:10px;padding:8px 18px;background:var(--accent);border:none}}
     </style>
     """,
     unsafe_allow_html=True,
@@ -50,20 +50,28 @@ st.markdown(
 # --- Central wrapper ---
 st.markdown("<div class='center-container'>", unsafe_allow_html=True)
 
-# Header centered
+# Header with Lottie animation centered (using HTML embed)
 st.markdown(
     """
     <div class='header-row'>
         <div style='text-align:center'>
             <div class='title'>🎬 Movie Success Predictor</div>
-            <div class='subtitle'>Enter movie details below — centered and focused UX for quick experimentation</div>
+            <div class='subtitle'>Enter movie details below — subtle animation and a contrasting theme</div>
         </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# Main content: inputs and preview centered using columns
+# Embed Lottie animation using web component inside a centered div
+st.components.v1.html(f"""
+    <div style='display:flex;justify-content:center;margin-bottom:6px;'>
+      <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+      <lottie-player src=\"{LOTTIE_URL}\" background=\"transparent\" speed=\"1\" style=\"width:220px;height:220px;\" loop autoplay></lottie-player>
+    </div>
+""", height=260)
+
+# Main content: inputs centered
 with st.container():
     left_col, mid_col, right_col = st.columns([1, 2, 1])
 
@@ -131,7 +139,7 @@ input_dict = {
     'title': 'User Input Movie'
 }
 
-# Prediction logic
+# Prediction logic (centered results)
 if predict_btn:
     with st.spinner("Predicting..."):
         try:
@@ -168,4 +176,4 @@ if predict_btn:
             st.exception(e)
 
 # Footer
-st.markdown("<div class='footer'>Made with ❤️ — Aditya Tiwari,Akshat Verma,Ansh Sharma</div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>Made with ❤️ — theme & animation added. Run with: <code>streamlit run streamlit_movie_predictor.py</code></div>", unsafe_allow_html=True)
