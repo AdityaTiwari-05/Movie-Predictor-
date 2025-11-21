@@ -169,5 +169,5 @@ if predict_btn:
             st.exception(e)
 
 # Footer
-st.markdown(f"<div class='footer'>Made with ❤️ - Meetanshee Gupta, Karti rimjha, Krish sendhav</code></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='footer'>Made with ❤️ - Meetanshee Gupta, Krati rimjha, Krish sendhav</code></div>", unsafe_allow_html=True)
 
